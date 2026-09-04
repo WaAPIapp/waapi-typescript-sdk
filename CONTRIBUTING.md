@@ -43,3 +43,17 @@ npm test
 ```
 
 No test may touch the network: pass a `fetch` into the client, as `tests/helpers.ts` does.
+
+## Releasing
+
+`npm publish` takes its version from `package.json` and ignores the git tag, so
+the two have to be moved together. `npm version` does both in one step:
+
+```bash
+npm version patch          # bumps package.json, commits, creates the v* tag
+git push --follow-tags     # pushes the commit and the tag
+```
+
+The tag triggers `publish.yml`, which refuses to run if the tag and
+`package.json` disagree — tagging without bumping would otherwise republish the
+previous version and fail at the last step, on a tag that cannot be reused.

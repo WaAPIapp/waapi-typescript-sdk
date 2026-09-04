@@ -19,6 +19,22 @@ jobs:
       id-token: write
     steps:
       - uses: actions/checkout@v4
+
+      # npm publish takes its version from package.json and ignores the tag,
+      # so a tag that disagrees with package.json silently republishes the old
+      # version and fails at the very last step. Catch it in five seconds
+      # instead, with a message that says what to do.
+      - name: The tag must match package.json
+        run: |
+          TAG="${GITHUB_REF_NAME#v}"
+          PKG="$(node -p "require('./package.json').version")"
+          if [ "$TAG" != "$PKG" ]; then
+            echo "::error::tag v$TAG does not match package.json version $PKG."
+            echo "::error::Release with: npm version <patch|minor|major> && git push --follow-tags"
+            exit 1
+          fi
+          echo "publishing $PKG"
+
       - uses: actions/setup-node@v4
         with:
           # Node 24, not 22: trusted publishing needs npm 11.5.1 or newer and
