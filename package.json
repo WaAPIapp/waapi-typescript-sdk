@@ -2,10 +2,21 @@
   "name": "@waapiapp/sdk",
   "version": "0.1.0",
   "description": "Official TypeScript SDK for the WaAPI REST API",
-  "keywords": ["waapi", "messaging", "api", "sdk", "automation", "chatbot", "typescript"],
+  "keywords": [
+    "waapi",
+    "messaging",
+    "api",
+    "sdk",
+    "automation",
+    "chatbot",
+    "typescript"
+  ],
   "homepage": "https://waapi.app",
   "bugs": "https://github.com/WaAPIapp/waapi-typescript-sdk/issues",
-  "repository": { "type": "git", "url": "git+https://github.com/WaAPIapp/waapi-typescript-sdk.git" },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/WaAPIapp/waapi-typescript-sdk.git"
+  },
   "license": "MIT",
   "author": "WaAPI <info@waapi.app>",
   "type": "module",
@@ -15,13 +26,20 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js",
       "require": "./dist/index.cjs"
-    }
+    },
+    "./package.json": "./package.json"
   },
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
-  "files": ["dist", "README.md", "LICENSE"],
-  "engines": { "node": ">=18" },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
   "scripts": {
     "build": "tsup",
     "test": "vitest run",
@@ -39,5 +57,7 @@
     "tsup": "^8.0.0",
     "vitest": "^2.0.0"
   },
-  "publishConfig": { "access": "public" }
+  "publishConfig": {
+    "access": "public"
+  }
 }
