@@ -1,0 +1,29 @@
+name: Publish to npm
+
+# Publishes on a v* tag using npm Trusted Publishing (OIDC) — no token stored
+# in the repository. Configure the trusted publisher once at
+# https://www.npmjs.com/package/@waapiapp/sdk/access
+#   organization: WaAPIapp   repository: waapi-typescript-sdk
+#   workflow: publish.yml    environment: npm
+
+on:
+  push:
+    tags: ['v*']
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    environment: npm
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.x'
+          registry-url: 'https://registry.npmjs.org'
+      - run: npm install
+      - run: npm test
+      - run: npm run build
+      - run: npm publish --provenance --access public
