@@ -21,8 +21,13 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: '22.x'
+          # Node 24, not 22: trusted publishing needs npm 11.5.1 or newer and
+          # Node 22 still ships npm 10.9.x. The explicit upgrade below makes
+          # that independent of what the runner image happens to bundle.
+          node-version: '24.x'
           registry-url: 'https://registry.npmjs.org'
+      - run: npm install -g npm@latest
+      - run: npm --version
       - run: npm install
       - run: npm test
       - run: npm run build
