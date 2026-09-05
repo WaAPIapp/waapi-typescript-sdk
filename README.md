@@ -98,7 +98,7 @@ try {
 | `NotFoundError` | HTTP 404 |
 | `ValidationError` | HTTP 422 — `.errors` holds the field errors |
 | `RateLimitError` | HTTP 429 — `.retryAfter` in seconds when the API sends it |
-| `FailedActionError` | HTTP 400, **and HTTP 200 with `status: error`** |
+| `FailedActionError` | HTTP 400, **and HTTP 200 with `data.status: error`** (or outer `status: error`) |
 | `ServerError` | HTTP 5xx |
 | `ConnectionError` | timeout, DNS, refused connection |
 
