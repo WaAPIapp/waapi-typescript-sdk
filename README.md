@@ -67,10 +67,18 @@ await client.action("some-new-action", { chatId: "4915112345678@c.us" });
 
 ## Errors
 
-A successful HTTP exchange is not proof the message was sent. The API answers
-`200` with `{"status": "error"}` when, for example, the instance is not
-connected — so the SDK throws on that too, rather than resolving with a body
-that looks like success.
+A successful HTTP exchange is not proof the message was sent. The API carries
+two envelopes:
+
+| Field | Answers |
+|---|---|
+| `status` | did the request reach the instance |
+| `data.status` | did the instance carry the action out |
+
+**The inner one is authoritative.** A malformed chat ID comes back as
+`{"status": "success", "data": {"status": "error", …}}` — nothing was sent. The
+SDK throws `FailedActionError` on either envelope, so neither reaches you
+looking like success.
 
 ```ts
 import { AuthenticationError, RateLimitError, FailedActionError } from "@waapiapp/sdk";

@@ -27,6 +27,27 @@ describe("the failure that looks like a success", () => {
     ).rejects.toThrow(FailedActionError);
   });
 
+  test("the inner status is the authoritative one", async () => {
+    // A request can reach the instance and still not be carried out. The outer
+    // envelope reports delivery to the instance; the inner one reports whether
+    // the instance did the thing. A malformed chatId is success-outside,
+    // error-inside — and was reported as sent until the check looked deeper.
+    const { client } = fake(() => ({
+      status: 200,
+      body: { status: "success", data: { status: "error", message: "incorrect chatId format." } },
+    }));
+
+    await expect(client.sendMessage({ chatId: "bogus", message: "not sent" })).rejects.toThrow(
+      FailedActionError,
+    );
+  });
+
+  test("a data array does not trip the inner check", async () => {
+    // Several actions return a list in `data`, which carries no status.
+    const { client } = fake(() => ({ status: 200, body: { status: "success", data: [{ id: 1 }] } }));
+    await expect(client.getChats({})).resolves.toMatchObject({ data: [{ id: 1 }] });
+  });
+
   test("HTTP 200 with status:success returns the body", async () => {
     const { client } = fake(() => ({ status: 200, body: { status: "success", data: { id: "abc" } } }));
     await expect(client.sendMessage({ chatId: "x@c.us", message: "hi" })).resolves.toMatchObject({

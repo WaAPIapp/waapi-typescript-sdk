@@ -28,6 +28,15 @@ function brief(body: unknown, limit = 400): string {
   return text.length <= limit ? text : `${text.slice(0, limit)}...`;
 }
 
+/** `body.data.status` when the response wraps a client action. */
+function innerStatus(body: Record<string, unknown>): unknown {
+  const data = body["data"];
+  if (data && typeof data === "object" && !Array.isArray(data)) {
+    return (data as Record<string, unknown>)["status"];
+  }
+  return undefined;
+}
+
 async function decode(response: Response): Promise<unknown> {
   const text = await response.text();
   if (!text) return undefined;
@@ -67,15 +76,24 @@ export async function interpret(
     throw new WaAPIError(`WaAPI returned HTTP ${status}: ${brief(body)}`);
   }
 
-  // A 2xx is not proof the action happened. The API answers 200 with
-  // {"status": "error"} when, for example, the instance is not connected.
+  // Two envelopes, and the inner one is the authoritative answer:
+  //
+  //   body.status       did the request reach the instance
+  //   body.data.status  did the instance carry the action out
+  //
+  // A malformed chatId comes back as {"status": "success", "data": {"status":
+  // "error", "message": "incorrect chatId format."}} — nothing was sent.
+  // Checking only the outer envelope reports that as delivered, which is the
+  // failure this class exists to prevent, one level further down.
   if (checkBodyStatus && body && typeof body === "object" && !Array.isArray(body)) {
-    const envelope = (body as Record<string, unknown>)["status"];
-    if (envelope !== undefined && envelope !== "success") {
-      throw new FailedActionError(
-        `WaAPI accepted the request but did not carry the action out: ${brief(body)}`,
-        body,
-      );
+    const record = body as Record<string, unknown>;
+    for (const envelope of [innerStatus(record), record["status"]]) {
+      if (envelope !== undefined && envelope !== "success") {
+        throw new FailedActionError(
+          `WaAPI accepted the request but did not carry the action out: ${brief(body)}`,
+          body,
+        );
+      }
     }
   }
 
